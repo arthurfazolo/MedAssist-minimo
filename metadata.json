@@ -1,0 +1,8 @@
+{
+  "name": "MedAssist 4.4 - minimo",
+  "description": "Ferramenta de apoio à prática clínica para médicos, contendo calculadoras, guia de medicações, base de doenças e modelos de prescrição.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

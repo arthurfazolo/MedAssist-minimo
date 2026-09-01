@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MedAssist</title>
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1B4F8A" />
+    <link rel="apple-touch-icon" href="/pwa-192x192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+          media="print"
+          onload="this.media='all'">
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <script>
+      window.tailwind = {
+        config: {
+          theme: {
+            extend: {
+              fontFamily: {
+                sans: ['Inter', 'sans-serif'],
+                display: ['Plus Jakarta Sans', 'sans-serif'],
+              },
+              colors: {
+                medical: {
+                  50:  '#EEF4FB',
+                  100: '#D5E5F5',
+                  500: '#2D7DD2',
+                  600: '#1B4F8A',
+                  700: '#163F6E',
+                  900: '#0D2640',
+                },
+                accent: {
+                  50:  '#E6F7F6',
+                  400: '#2DD4C8',
+                  500: '#0F9B8E',
+                  600: '#0C8A7E',
+                }
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      :root {
+        --bg-primary: #ffffff;
+        --bg-secondary: #FAFAFA;
+        --text-primary: #111827;
+        --text-secondary: #6B7280;
+        --accent: #1B4F8A;
+        --card-bg: #ffffff;
+        --border: #E5E7EB;
+      }
+
+      /* Transitions for theme */
+      body {
+        background-color: #FAFAFA;
+        color: #111827;
+        transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      }
+
+      /* Clean Light Mode Refactoring & Design System */
+      body:not(.dark-mode) {
+        background-color: #FAFAFA !important;
+        color: #111827 !important;
+      }
+
+      /* Force background of white/slate modules in light mode to be white */
+      body:not(.dark-mode) .bg-white {
+        background-color: #FFFFFF !important;
+      }
+      body:not(.dark-mode) .bg-gray-50,
+      body:not(.dark-mode) .bg-slate-50,
+      body:not(.dark-mode) .bg-zinc-50 {
+        background-color: #FFFFFF !important;
+      }
+
+      /* Elevate borders to soft #E5E7EB for extremely elegant contrast */
+      body:not(.dark-mode) .border-slate-100,
+      body:not(.dark-mode) .border-gray-50,
+      body:not(.dark-mode) .border-gray-100,
+      body:not(.dark-mode) .border-slate-200,
+      body:not(.dark-mode) .border-gray-200,
+      body:not(.dark-mode) .border-emerald-250,
+      body:not(.dark-mode) .border-teal-200,
+      body:not(.dark-mode) .border-slate-150 {
+        border-color: #E5E7EB !important;
+      }
+
+      /* Smooth, professional shadows for cards and inputs in Light Mode */
+      body:not(.dark-mode) .shadow-sm {
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
+      }
+      body:not(.dark-mode) .shadow,
+      body:not(.dark-mode) .shadow-md,
+      body:not(.dark-mode) .shadow-lg {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+      }
+
+      /* Pristine Gray level-1 bg for slight separations */
+      body:not(.dark-mode) .bg-gray-100,
+      body:not(.dark-mode) .bg-slate-100,
+      body:not(.dark-mode) .bg-zinc-100 {
+        background-color: #FAFAFA !important;
+      }
+
+      /* Soft, readable title and text colors */
+      body:not(.dark-mode) .text-slate-900,
+      body:not(.dark-mode) .text-gray-900,
+      body:not(.dark-mode) .text-zinc-900 {
+        color: #111827 !important;
+      }
+      body:not(.dark-mode) .text-slate-700,
+      body:not(.dark-mode) .text-gray-700,
+      body:not(.dark-mode) .text-zinc-700 {
+        color: #374151 !important;
+      }
+      body:not(.dark-mode) .text-slate-650,
+      body:not(.dark-mode) .text-slate-600,
+      body:not(.dark-mode) .text-gray-600,
+      body:not(.dark-mode) .text-zinc-650 {
+        color: #4B5563 !important;
+      }
+      body:not(.dark-mode) .text-slate-500,
+      body:not(.dark-mode) .text-gray-500,
+      body:not(.dark-mode) .text-zinc-500 {
+        color: #6B7280 !important;
+      }
+      body:not(.dark-mode) .text-slate-400,
+      body:not(.dark-mode) .text-gray-400,
+      body:not(.dark-mode) .text-zinc-400 {
+        color: #9CA3AF !important;
+      }
+
+      /* Clean inputs form and placeholders focus styling in Light Mode */
+      body:not(.dark-mode) input,
+      body:not(.dark-mode) select,
+      body:not(.dark-mode) textarea {
+        background-color: #FFFFFF !important;
+        border-color: #D1D5DB !important;
+        color: #111827 !important;
+      }
+      body:not(.dark-mode) input::placeholder,
+      body:not(.dark-mode) textarea::placeholder {
+        color: #9CA3AF !important;
+      }
+      body:not(.dark-mode) input:focus,
+      body:not(.dark-mode) select:focus,
+      body:not(.dark-mode) textarea:focus {
+        border-color: #1B4F8A !important;
+        box-shadow: 0 0 0 2px rgba(27, 79, 138, 0.12) !important;
+      }
+
+      /* Clean secondary buttons in Light Mode */
+      body:not(.dark-mode) .btn-secondary,
+      body:not(.dark-mode) button.bg-slate-100,
+      body:not(.dark-mode) button.bg-gray-100 {
+        background-color: #FFFFFF !important;
+        border: 1px solid #E5E7EB !important;
+        color: #374151 !important;
+      }
+      body:not(.dark-mode) .btn-secondary:hover,
+      body:not(.dark-mode) button.bg-slate-100:hover,
+      body:not(.dark-mode) button.bg-gray-100:hover {
+        background-color: #F9FAFB !important;
+        color: #111827 !important;
+        border-color: #D1D5DB !important;
+      }
+
+      /* Subtly clean headers for Light tables */
+      body:not(.dark-mode) th {
+        background-color: #FAFAFA !important;
+        color: #4B5563 !important;
+        border-bottom: 1px solid #E5E7EB !important;
+      }
+      body:not(.dark-mode) tr:hover {
+        background-color: #F9FAFB !important;
+      }
+
+      /* Nav active style override in light mode */
+      body:not(.dark-mode) .bg-medical-50 {
+        background-color: rgba(27, 79, 138, 0.06) !important;
+        color: #1B4F8A !important;
+      }
+
+      /* Font Size Scaling */
+      :root[data-font-size="small"] {
+        font-size: 14px;
+      }
+      :root[data-font-size="medium"] {
+        font-size: 16px;
+      }
+      :root[data-font-size="large"] {
+        font-size: 18px;
+      }
+
+      /* Dark Mode Palette overrides */
+      body.dark-mode {
+        --bg-primary: #090E1A;
+        --bg-secondary: #0D1525;
+        --text-primary: #F8FAFC;
+        --text-secondary: #94A3B8;
+        --accent: #38BDF8;
+        --card-bg: #11192A;
+        --border: rgba(255, 255, 255, 0.08);
+        
+        background-color: #090E1A !important;
+        color: #F8FAFC !important;
+      }
+
+      /* Apply variable classes in Dark Mode manually for standard Tailwind classes to minimize codebase-wide churn */
+      html.dark-mode, body.dark-mode {
+        background-color: #090E1A !important;
+        color: #F8FAFC !important;
+      }
+
+      /* Soft overlay cards and panels */
+      body.dark-mode .bg-white {
+        background-color: #11192A !important;
+      }
+      body.dark-mode [class*="bg-white"] {
+        background-color: #11192A !important;
+      }
+
+      /* Nested elements or slightly sunken areas */
+      body.dark-mode .bg-gray-50,
+      body.dark-mode .bg-slate-50,
+      body.dark-mode .bg-zinc-50 {
+        background-color: #0E1626 !important;
+      }
+
+      /* Minor elevated elements / tags / secondary items */
+      body.dark-mode .bg-gray-100,
+      body.dark-mode .bg-slate-100,
+      body.dark-mode .bg-zinc-100 {
+        background-color: #16223B !important;
+      }
+
+      /* Hover states and active items */
+      body.dark-mode .bg-gray-200,
+      body.dark-mode .bg-slate-200,
+      body.dark-mode .bg-zinc-200 {
+        background-color: #1E2D4A !important;
+      }
+
+      /* Main dark section overrides */
+      body.dark-mode .bg-slate-800,
+      body.dark-mode .bg-gray-800,
+      body.dark-mode .bg-zinc-800 {
+        background-color: #11192A !important;
+      }
+      body.dark-mode .bg-slate-900,
+      body.dark-mode .bg-gray-900,
+      body.dark-mode .bg-black {
+        background-color: #090E1A !important;
+      }
+
+      /* Status elements & translucencies for professional SaaS feel */
+      body.dark-mode .bg-emerald-50,
+      body.dark-mode .bg-emerald-100 {
+        background-color: rgba(16, 185, 129, 0.12) !important;
+        color: #34D399 !important;
+      }
+      body.dark-mode .bg-purple-50,
+      body.dark-mode .bg-purple-100 {
+        background-color: rgba(139, 92, 246, 0.12) !important;
+        color: #A78BFA !important;
+      }
+      body.dark-mode .bg-blue-50,
+      body.dark-mode .bg-blue-100,
+      body.dark-mode .bg-medical-50 {
+        background-color: rgba(56, 189, 248, 0.12) !important;
+        color: #38BDF8 !important;
+      }
+      body.dark-mode .bg-amber-50,
+      body.dark-mode .bg-amber-100 {
+        background-color: rgba(245, 158, 11, 0.12) !important;
+        color: #FBBF24 !important;
+      }
+      body.dark-mode .bg-red-50,
+      body.dark-mode .bg-red-100 {
+        background-color: rgba(239, 68, 68, 0.12) !important;
+        color: #F87171 !important;
+      }
+      body.dark-mode .bg-sky-50,
+      body.dark-mode .bg-sky-100 {
+        background-color: rgba(56, 189, 248, 0.12) !important;
+        color: #38BDF8 !important;
+      }
+
+      /* Typographic overrides to prevent fading texts in dark mode */
+      body.dark-mode .text-slate-900,
+      body.dark-mode .text-gray-950,
+      body.dark-mode .text-gray-900,
+      body.dark-mode .text-zinc-900,
+      body.dark-mode .text-neutral-900,
+      body.dark-mode .text-black {
+        color: #F8FAFC !important;
+      }
+
+      body.dark-mode .text-slate-800,
+      body.dark-mode .text-slate-700,
+      body.dark-mode .text-slate-650,
+      body.dark-mode .text-slate-600,
+      body.dark-mode .text-gray-800,
+      body.dark-mode .text-gray-700,
+      body.dark-mode .text-gray-600,
+      body.dark-mode .text-zinc-850,
+      body.dark-mode .text-zinc-800,
+      body.dark-mode .text-zinc-700 {
+        color: #E2E8F0 !important;
+      }
+
+      body.dark-mode .text-slate-500,
+      body.dark-mode .text-slate-550,
+      body.dark-mode .text-gray-500,
+      body.dark-mode .text-zinc-500,
+      body.dark-mode .text-neutral-500 {
+        color: #94A3B8 !important;
+      }
+
+      body.dark-mode .text-slate-400,
+      body.dark-mode .text-gray-400,
+      body.dark-mode .text-zinc-400,
+      body.dark-mode .text-neutral-400 {
+        color: #64748B !important;
+      }
+
+      /* Core Medical branding classes overrides in dark Mode */
+      body.dark-mode .text-medical-900 {
+        color: #E0F2FE !important;
+      }
+      body.dark-mode .text-medical-800 {
+        color: #BAE6FD !important;
+      }
+      body.dark-mode .text-medical-700 {
+        color: #7DD3FC !important;
+      }
+      body.dark-mode .text-medical-600 {
+        color: #38bdf8 !important;
+      }
+      body.dark-mode .text-medical-500 {
+        color: #60A5FA !important;
+      }
+
+      /* Pristine, high-uniformity borders mapping */
+      body.dark-mode .border-gray-50,
+      body.dark-mode .border-gray-100,
+      body.dark-mode .border-gray-200,
+      body.dark-mode .border-gray-300,
+      body.dark-mode .border-slate-50,
+      body.dark-mode .border-slate-100,
+      body.dark-mode .border-slate-150,
+      body.dark-mode .border-slate-200,
+      body.dark-mode .border-slate-300,
+      body.dark-mode .border-zinc-100,
+      body.dark-mode .border-zinc-200 {
+        border-color: rgba(255, 255, 255, 0.08) !important;
+      }
+
+      /* Input elements, custom selects and controls comfort */
+      body.dark-mode input,
+      body.dark-mode select,
+      body.dark-mode textarea {
+        background-color: #0E1626 !important;
+        color: #E2E8F0 !important;
+        border-color: #1E2D4A !important;
+      }
+
+      body.dark-mode input:focus,
+      body.dark-mode select:focus,
+      body.dark-mode textarea:focus {
+        border-color: #38BDF8 !important;
+        box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15) !important;
+      }
+
+      body.dark-mode input::placeholder,
+      body.dark-mode textarea::placeholder {
+        color: #64748B !important;
+      }
+
+      body.dark-mode select option {
+        background-color: #11192A !important;
+        color: #E2E8F0 !important;
+      }
+
+      /* Buttons Premium Refinement */
+      body.dark-mode button.bg-medical-600,
+      body.dark-mode .btn-primary {
+        background-color: #0284c7 !important;
+        color: #FFFFFF !important;
+      }
+      body.dark-mode button.bg-medical-600:hover,
+      body.dark-mode .btn-primary:hover {
+        background-color: #0ea5e9 !important;
+      }
+
+      body.dark-mode .btn-secondary,
+      body.dark-mode button.bg-slate-100,
+      body.dark-mode button.bg-slate-200,
+      body.dark-mode button.bg-gray-100 {
+        background-color: #16223B !important;
+        border: 1px solid #1E2D4A !important;
+        color: #E2E8F0 !important;
+      }
+      body.dark-mode .btn-secondary:hover,
+      body.dark-mode button.bg-slate-100:hover,
+      body.dark-mode button.bg-slate-200:hover,
+      body.dark-mode button.bg-gray-100:hover {
+        background-color: #1E2D4A !important;
+        border-color: #2A3E62 !important;
+        color: #F8FAFC !important;
+      }
+
+      /* Custom Shadows for 3D Layer Elevation */
+      body.dark-mode .shadow-sm {
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+      }
+      body.dark-mode .shadow,
+      body.dark-mode .shadow-md,
+      body.dark-mode .shadow-lg,
+      body.dark-mode .shadow-2xl {
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45) !important;
+      }
+
+      /* Lists, sidebars hover lists active tabs */
+      body.dark-mode .hover\:bg-slate-50:hover,
+      body.dark-mode .hover\:bg-slate-100:hover,
+      body.dark-mode .hover\:bg-gray-150:hover,
+      body.dark-mode .hover\:bg-gray-50:hover,
+      body.dark-mode .dark\:hover\:bg-slate-700:hover,
+      body.dark-mode .dark\:hover\:bg-slate-800:hover {
+        background-color: rgba(255, 255, 255, 0.04) !important;
+      }
+
+      /* Dark header & footer */
+      body.dark-mode footer {
+        background-color: #0D1525 !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
+      }
+
+      /* Table rows, header, hover */
+      body.dark-mode th {
+        background-color: #0E1626 !important;
+        color: #94A3B8 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+      }
+      body.dark-mode tr:hover {
+        background-color: rgba(255, 255, 255, 0.02) !important;
+      }
+
+      /* Sleek dark scrollbars */
+      body.dark-mode ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      body.dark-mode ::-webkit-scrollbar-track {
+        background: #090E1A;
+      }
+      body.dark-mode ::-webkit-scrollbar-thumb {
+        background: #1E2D4A;
+        border-radius: 9999px;
+      }
+      body.dark-mode ::-webkit-scrollbar-thumb:hover {
+        background: #2A3E62;
+      }
+    </style>
+    <script>
+      (function() {
+        var currentUser = null;
+        try {
+          var rawUser = localStorage.getItem('medassist_current_user');
+          if (rawUser) {
+            currentUser = JSON.parse(rawUser);
+          }
+        } catch(e) {}
+        
+        var userId = currentUser ? currentUser.id : 'guest';
+        var userPrefsKey = 'medassist_prefs_' + userId;
+        var rawPrefs = localStorage.getItem(userPrefsKey);
+        var prefs = {};
+        if (rawPrefs) {
+          try { prefs = JSON.parse(rawPrefs); } catch(e) {}
+        }
+        
+        var theme = prefs.theme;
+        if (!theme) {
+          var systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          theme = systemPrefersDark ? 'dark' : 'light';
+        }
+        
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark-mode');
+          document.body && document.body.classList.add('dark-mode');
+        } else {
+          document.documentElement.classList.remove('dark-mode');
+          document.body && document.body.classList.remove('dark-mode');
+        }
+        
+        var fontSize = prefs.fontSize || 'medium';
+        document.documentElement.setAttribute('data-font-size', fontSize);
+      })();
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.10.1",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((reg) => {
+            console.log('[Service Worker] Registro bem-sucedido no escopo:', reg.scope);
+          })
+          .catch((err) => {
+            console.error('[Service Worker] Falha no registro:', err);
+          });
+      });
+    }
+  </script>
+</body>
+</html>

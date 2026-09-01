@@ -1,0 +1,169 @@
+{
+  "entities": {
+    "MedicalDisease": {
+      "title": "MedicalDisease",
+      "description": "Details of a clinical medical disease with expanded content",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nome": { "type": "string" },
+        "sintomas": { "type": "array" },
+        "fatores_risco": { "type": "array" },
+        "red_flags: ": { "type": "array" },
+        "diferenciais": { "type": "array" },
+        "achados_exames": { "type": "array" },
+        "criterios_diagnosticos": { "type": "array" },
+        "categoria": { "type": "string" },
+        "inTrash": { "type": "boolean" },
+        "updatedAt": { "type": "string" },
+        "definition": { "type": "string" },
+        "epidemiology": { "type": "string" },
+        "etiology": { "type": "string" },
+        "pathophysiology": { "type": "string" },
+        "treatment": { "type": "string" },
+        "complications": { "type": "string" },
+        "prognosis": { "type": "string" },
+        "references": { "type": "array" }
+      },
+      "required": ["id", "nome", "sintomas", "fatores_risco", "red_flags", "diferenciais"]
+    },
+    "ClinicalProtocol": {
+      "title": "ClinicalProtocol",
+      "description": "A clinical guidelines protocol or walkthrough step schema",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the protocol" },
+        "titulo": { "type": "string", "description": "Title of the protocol" },
+        "categoria": { "type": "string", "description": "Category: Pronto Socorro, Ambulatório, etc." },
+        "descricao": { "type": "string", "description": "Short description of the protocol purpose" },
+        "status": { "type": "string", "enum": ["completo", "construcao"], "description": "Current status of the protocol" },
+        "nos": { "type": "array", "description": "Structured nodes of the clinical workflow" }
+      },
+      "required": ["id", "titulo", "categoria", "descricao", "status", "nos"]
+    },
+    "Medication": {
+      "title": "Medication",
+      "description": "Details of a specific clinical medication",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "genericName": { "type": "string" },
+        "pharmacologicalClass": { "type": "string" },
+        "presentations": { "type": "array" },
+        "usualDoses": { "type": "object" },
+        "commercialNames": { "type": "array" },
+        "susAvailability": { "type": "boolean" },
+        "costIndicator": { "type": "string", "enum": ["$", "$$", "$$$"] },
+        "prescriptionType": { "type": "string" },
+        "pregnancySafety": { "type": "object" },
+        "contraindications": { "type": "array" },
+        "drugInteractions": { "type": "array" },
+        "packageInsertUrl": { "type": "string" },
+        "mainIndications": { "type": "array" }
+      },
+      "required": ["id", "genericName", "pharmacologicalClass", "presentations", "usualDoses", "commercialNames", "susAvailability", "costIndicator"]
+    },
+    "CustomCalculator": {
+      "title": "CustomCalculator",
+      "description": "Admin configuration for a custom math-formula based calculator",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "inputs": { "type": "array" },
+        "formula": { "type": "string" }
+      },
+      "required": ["id", "name", "description", "category", "inputs", "formula"]
+    },
+    "Prescription": {
+      "title": "Prescription",
+      "description": "Pre-filled structured medical prescription template",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "content": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "title", "category", "content"]
+    },
+    "AdminConfig": {
+      "title": "AdminConfig",
+      "description": "User administration designation config",
+      "type": "object",
+      "properties": {
+        "isAdmin": { "type": "boolean" },
+        "email": { "type": "string" }
+      },
+      "required": ["isAdmin"]
+    },
+    "RolePermission": {
+      "title": "RolePermission",
+      "description": "Dynamic page & feature permissions map for a user role",
+      "type": "object",
+      "properties": {
+        "dashboard": { "type": "boolean" },
+        "library": { "type": "boolean" },
+        "protocols": { "type": "boolean" },
+        "calculators": { "type": "boolean" },
+        "prescriptions": { "type": "boolean" },
+        "userManagement": { "type": "boolean" },
+        "admin": { "type": "boolean" },
+        "medications": { "type": "boolean" },
+        "fluxogramas": { "type": "boolean" }
+      },
+      "required": ["dashboard", "library", "protocols", "calculators", "prescriptions", "userManagement", "admin", "medications", "fluxogramas"]
+    },
+    "ConsultRoutine": {
+      "title": "ConsultRoutine",
+      "description": "Consult routines and special clinical guides",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "titulo": { "type": "string" },
+        "categoria": { "type": "string" },
+        "descricao": { "type": "string" },
+        "status": { "type": "string" },
+        "consultas": { "type": "array" }
+      },
+      "required": ["id", "titulo", "categoria", "descricao", "status", "consultas"]
+    }
+  },
+  "firestore": {
+    "/permissions/{roleId}": {
+      "schema": "RolePermission",
+      "description": "Permissions associated with each user system profile/role"
+    },
+    "/protocols/{protocolId}": {
+      "schema": "ClinicalProtocol",
+      "description": "Global clinical protocols added or edited by admins"
+    },
+    "/medications/{medicationId}": {
+      "schema": "Medication",
+      "description": "Global medications database added or edited by admins"
+    },
+    "/calculators/{calculatorId}": {
+      "schema": "CustomCalculator",
+      "description": "Global custom calculators added by admins"
+    },
+    "/prescriptions/{prescriptionId}": {
+      "schema": "Prescription",
+      "description": "Global prescription templates added or edited by admins"
+    },
+    "/admins/{uid}": {
+      "schema": "AdminConfig",
+      "description": "Identifies authenticated admin users dynamically"
+    },
+    "/diseases/{diseaseId}": {
+      "schema": "MedicalDisease",
+      "description": "Global medical diseases with expanded documentation and context"
+    },
+    "/consultRoutines/{routineId}": {
+      "schema": "ConsultRoutine",
+      "description": "Consult routines and special clinical guides"
+    }
+  }
+}

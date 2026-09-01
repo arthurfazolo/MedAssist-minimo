@@ -1,0 +1,307 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Pillar 1: Global safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Phase 3: Global helper primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && (
+        (request.auth.token != null && 'email_verified' in request.auth.token && request.auth.token.email_verified == true) ||
+        (request.auth.token != null && 'email' in request.auth.token && (
+          request.auth.token.email == 'medassist.sup@gmail.com' ||
+          request.auth.token.email == 'arthur.fazolo@gmail.com'
+        ))
+      );
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token != null && 'email' in request.auth.token && (
+          request.auth.token.email == 'medassist.sup@gmail.com' ||
+          request.auth.token.email == 'arthur.fazolo@gmail.com' ||
+          request.auth.token.email == 'admin@med.com' ||
+          request.auth.token.email == 'admin@medassist.com'
+        ))
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-\\.]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Pillar 2: Validation Blueprints (Entity validation helpers)
+    function isValidProtocol(data) {
+      return data.id is string && data.id.size() <= 128 &&
+             data.titulo is string && data.titulo.size() <= 200 &&
+             data.categoria is string && data.categoria.size() <= 100 &&
+             data.descricao is string && data.descricao.size() <= 1000 &&
+             data.status is string && (data.status == 'completo' || data.status == 'construcao') &&
+             data.nos is list && data.nos.size() <= 200 &&
+             (!('category' in data) || (data.category is string && data.category.size() <= 100)) &&
+             (!('lastReviewedAt' in data) || (data.lastReviewedAt is string && data.lastReviewedAt.size() <= 128)) &&
+             (!('nextReviewAt' in data) || (data.nextReviewAt is string && data.nextReviewAt.size() <= 128)) &&
+             (!('reviewStatus' in data) || (data.reviewStatus is string && data.reviewStatus.size() <= 64)) &&
+             (!('reviewNotes' in data) || (data.reviewNotes is string && data.reviewNotes.size() <= 2000)) &&
+             (!('reviewedBy' in data) || (data.reviewedBy is string && data.reviewedBy.size() <= 256)) &&
+             (!('reviewPriority' in data) || (data.reviewPriority is string && data.reviewPriority.size() <= 64)) &&
+             (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 128)) &&
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 128)) &&
+             (!('reviewHistory' in data) || (data.reviewHistory is list && data.reviewHistory.size() <= 100)) &&
+             (!('customReviewIntervalMonths' in data) || (data.customReviewIntervalMonths is int || data.customReviewIntervalMonths is float || data.customReviewIntervalMonths == null)) &&
+             (!('isSpecial' in data) || (data.isSpecial is bool)) &&
+             (!('specialType' in data) || (data.specialType is string && data.specialType.size() <= 64)) &&
+             (!('consultas' in data) || (data.consultas is list && data.consultas.size() <= 100));
+    }
+
+    function isValidMedication(data) {
+      return data.id is string && data.id.size() <= 128 &&
+             data.genericName is string && data.genericName.size() <= 200 &&
+             data.pharmacologicalClass is string && data.pharmacologicalClass.size() <= 200 &&
+             data.presentations is list && data.presentations.size() <= 100 &&
+             data.usualDoses is map &&
+             data.commercialNames is list && data.commercialNames.size() <= 100 &&
+             data.susAvailability is bool &&
+             data.costIndicator is string && (data.costIndicator == '$' || data.costIndicator == '$$' || data.costIndicator == '$$$') &&
+             (!('prescriptionType' in data) || (data.prescriptionType is string && data.prescriptionType.size() <= 100)) &&
+             (!('pregnancySafety' in data) || (data.pregnancySafety is map)) &&
+             (!('contraindications' in data) || (data.contraindications is list)) &&
+             (!('drugInteractions' in data) || (data.drugInteractions is list)) &&
+             (!('packageInsertUrl' in data) || (data.packageInsertUrl is string && data.packageInsertUrl.size() <= 1000)) &&
+             (!('mainIndications' in data) || (data.mainIndications is list)) &&
+             (!('lastReviewedAt' in data) || (data.lastReviewedAt is string && data.lastReviewedAt.size() <= 128)) &&
+             (!('nextReviewAt' in data) || (data.nextReviewAt is string && data.nextReviewAt.size() <= 128)) &&
+             (!('reviewStatus' in data) || (data.reviewStatus is string && data.reviewStatus.size() <= 64)) &&
+             (!('reviewNotes' in data) || (data.reviewNotes is string && data.reviewNotes.size() <= 2000)) &&
+             (!('reviewedBy' in data) || (data.reviewedBy is string && data.reviewedBy.size() <= 256)) &&
+             (!('reviewPriority' in data) || (data.reviewPriority is string && data.reviewPriority.size() <= 64)) &&
+             (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 128)) &&
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 128)) &&
+             (!('reviewHistory' in data) || (data.reviewHistory is list && data.reviewHistory.size() <= 100)) &&
+             (!('customReviewIntervalMonths' in data) || (data.customReviewIntervalMonths is int || data.customReviewIntervalMonths is float || data.customReviewIntervalMonths == null));
+    }
+
+    function isValidCalculator(data) {
+      return data.id is string && data.id.size() <= 128 &&
+             data.name is string && data.name.size() <= 200 &&
+             data.description is string && data.description.size() <= 1000 &&
+             data.category is string && data.category.size() <= 100 &&
+             data.inputs is list && data.inputs.size() <= 50 &&
+             data.formula is string && data.formula.size() <= 500 &&
+             (!('lastReviewedAt' in data) || (data.lastReviewedAt is string && data.lastReviewedAt.size() <= 128)) &&
+             (!('nextReviewAt' in data) || (data.nextReviewAt is string && data.nextReviewAt.size() <= 128)) &&
+             (!('reviewStatus' in data) || (data.reviewStatus is string && data.reviewStatus.size() <= 64)) &&
+             (!('reviewNotes' in data) || (data.reviewNotes is string && data.reviewNotes.size() <= 2000)) &&
+             (!('reviewedBy' in data) || (data.reviewedBy is string && data.reviewedBy.size() <= 256)) &&
+             (!('reviewPriority' in data) || (data.reviewPriority is string && data.reviewPriority.size() <= 64)) &&
+             (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 128)) &&
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 128)) &&
+             (!('reviewHistory' in data) || (data.reviewHistory is list && data.reviewHistory.size() <= 100)) &&
+             (!('customReviewIntervalMonths' in data) || (data.customReviewIntervalMonths is int || data.customReviewIntervalMonths is float || data.customReviewIntervalMonths == null));
+    }
+
+    function isValidPrescription(data) {
+      return data.id is string && data.id.size() <= 128 &&
+             data.title is string && data.title.size() <= 200 &&
+             data.category is string && data.category.size() <= 100 &&
+             data.content is string && data.content.size() <= 5000 &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 5000)) &&
+             (!('lastReviewedAt' in data) || (data.lastReviewedAt is string && data.lastReviewedAt.size() <= 128)) &&
+             (!('nextReviewAt' in data) || (data.nextReviewAt is string && data.nextReviewAt.size() <= 128)) &&
+             (!('reviewStatus' in data) || (data.reviewStatus is string && data.reviewStatus.size() <= 64)) &&
+             (!('reviewNotes' in data) || (data.reviewNotes is string && data.reviewNotes.size() <= 2000)) &&
+             (!('reviewedBy' in data) || (data.reviewedBy is string && data.reviewedBy.size() <= 256)) &&
+             (!('reviewPriority' in data) || (data.reviewPriority is string && data.reviewPriority.size() <= 64)) &&
+             (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 128)) &&
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 128)) &&
+             (!('reviewHistory' in data) || (data.reviewHistory is list && data.reviewHistory.size() <= 100)) &&
+             (!('customReviewIntervalMonths' in data) || (data.customReviewIntervalMonths is int || data.customReviewIntervalMonths is float || data.customReviewIntervalMonths == null));
+    }
+
+    function isValidAdminConfig(data) {
+      return data.isAdmin is bool &&
+             data.email is string && data.email.size() <= 200 &&
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 100));
+    }
+
+    function isValidRolePermission(data) {
+      return data.dashboard is bool &&
+             data.library is bool &&
+             data.protocols is bool &&
+             data.calculators is bool &&
+             data.prescriptions is bool &&
+             data.userManagement is bool &&
+             data.admin is bool &&
+             data.medications is bool &&
+             data.fluxogramas is bool &&
+             data.aiAssistant is bool;
+    }
+
+    function isValidDisease(data) {
+      return data.id is string && data.id.size() <= 128 &&
+             data.nome is string && data.nome.size() <= 200 &&
+             data.sintomas is list &&
+             data.fatores_risco is list &&
+             data.red_flags is list &&
+             data.diferenciais is list &&
+             (!('achados_exames' in data) || (data.achados_exames is list && data.achados_exames.size() <= 100)) &&
+             (!('criterios_diagnosticos' in data) || (data.criterios_diagnosticos is list && data.criterios_diagnosticos.size() <= 100)) &&
+             (!('categoria' in data) || (data.categoria is string && data.categoria.size() <= 100)) &&
+             (!('inTrash' in data) || (data.inTrash is bool)) &&
+             (!('definition' in data) || (data.definition is string && data.definition.size() <= 5000)) &&
+             (!('epidemiology' in data) || (data.epidemiology is string && data.epidemiology.size() <= 3000)) &&
+             (!('etiology' in data) || (data.etiology is string && data.etiology.size() <= 3000)) &&
+             (!('pathophysiology' in data) || (data.pathophysiology is string && data.pathophysiology.size() <= 5000)) &&
+             (!('treatment' in data) || (data.treatment is string && data.treatment.size() <= 5000)) &&
+             (!('complications' in data) || (data.complications is string && data.complications.size() <= 3000)) &&
+             (!('prognosis' in data) || (data.prognosis is string && data.prognosis.size() <= 3000)) &&
+             (!('references' in data) || (data.references is list && data.references.size() <= 100)) &&
+             (!('lastReviewedAt' in data) || (data.lastReviewedAt is string && data.lastReviewedAt.size() <= 128)) &&
+             (!('nextReviewAt' in data) || (data.nextReviewAt is string && data.nextReviewAt.size() <= 128)) &&
+             (!('reviewStatus' in data) || (data.reviewStatus is string && data.reviewStatus.size() <= 64)) &&
+             (!('reviewNotes' in data) || (data.reviewNotes is string && data.reviewNotes.size() <= 2000)) &&
+             (!('reviewedBy' in data) || (data.reviewedBy is string && data.reviewedBy.size() <= 256)) &&
+             (!('reviewPriority' in data) || (data.reviewPriority is string && data.reviewPriority.size() <= 64)) &&
+             (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 128)) &&
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 128)) &&
+             (!('reviewHistory' in data) || (data.reviewHistory is list && data.reviewHistory.size() <= 100)) &&
+             (!('customReviewIntervalMonths' in data) || (data.customReviewIntervalMonths is int || data.customReviewIntervalMonths is float || data.customReviewIntervalMonths == null));
+    }
+
+    // Collection matches
+    match /permissions/{roleId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidId(roleId) &&
+                               incoming().keys().hasAll(["dashboard", "library", "protocols", "calculators", "prescriptions", "userManagement", "admin", "medications", "fluxogramas", "aiAssistant"]) &&
+                               incoming().keys().size() == 10 &&
+                               isValidRolePermission(incoming());
+      allow delete: if isAdmin() && isValidId(roleId);
+    }
+
+    match /admins/{uid} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidId(uid) &&
+                               incoming().keys().hasAll(["isAdmin", "email"]) &&
+                               (incoming().keys().size() == 2 || (incoming().keys().size() == 3 && incoming().keys().hasAll(["updatedAt"]))) &&
+                               isValidAdminConfig(incoming());
+      allow delete: if isAdmin() && isValidId(uid);
+    }
+
+    match /protocols/{protocolId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(protocolId) && incoming().id == protocolId &&
+                      incoming().keys().hasAll(['id', 'titulo', 'categoria', 'descricao', 'status', 'nos']) &&
+                      isValidProtocol(incoming());
+      allow update: if isAdmin() && isValidId(protocolId) && incoming().id == protocolId &&
+                      isValidProtocol(incoming()) && (
+                        incoming().diff(existing()).affectedKeys().hasOnly([
+                          'titulo', 'categoria', 'descricao', 'status', 'nos',
+                          'category', 'lastReviewedAt', 'nextReviewAt', 'reviewStatus',
+                          'reviewNotes', 'reviewedBy', 'reviewPriority', 'createdAt',
+                          'updatedAt', 'reviewHistory', 'customReviewIntervalMonths',
+                          'isSpecial', 'specialType', 'consultas'
+                        ])
+                      );
+      allow delete: if isAdmin();
+    }
+
+    match /medications/{medicationId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(medicationId) && incoming().id == medicationId &&
+                      incoming().keys().hasAll(["id", "genericName", "pharmacologicalClass", "presentations", "usualDoses", "commercialNames", "susAvailability", "costIndicator"]) &&
+                      isValidMedication(incoming());
+      allow update: if isAdmin() && isValidId(medicationId) && incoming().id == medicationId &&
+                      isValidMedication(incoming()) && (
+                        incoming().diff(existing()).affectedKeys().hasOnly([
+                          'genericName', 'pharmacologicalClass', 'presentations', 'usualDoses', 'commercialNames', 'susAvailability', 'costIndicator',
+                          'prescriptionType', 'pregnancySafety', 'contraindications', 'drugInteractions', 'packageInsertUrl', 'mainIndications',
+                          'lastReviewedAt', 'nextReviewAt', 'reviewStatus', 'reviewNotes', 'reviewedBy', 'reviewPriority', 'createdAt', 'updatedAt', 'reviewHistory', 'customReviewIntervalMonths'
+                        ])
+                      );
+      allow delete: if isAdmin();
+    }
+
+    match /calculators/{calculatorId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(calculatorId) && incoming().id == calculatorId &&
+                      incoming().keys().hasAll(["id", "name", "description", "category", "inputs", "formula"]) &&
+                      isValidCalculator(incoming());
+      allow update: if isAdmin() && isValidId(calculatorId) && incoming().id == calculatorId &&
+                      isValidCalculator(incoming()) && (
+                        incoming().diff(existing()).affectedKeys().hasOnly([
+                          'name', 'description', 'category', 'inputs', 'formula',
+                          'lastReviewedAt', 'nextReviewAt', 'reviewStatus', 'reviewNotes', 'reviewedBy', 'reviewPriority', 'createdAt', 'updatedAt', 'reviewHistory', 'customReviewIntervalMonths'
+                        ])
+                      );
+      allow delete: if isAdmin();
+    }
+
+    match /prescriptions/{prescriptionId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(prescriptionId) && incoming().id == prescriptionId &&
+                      incoming().keys().hasAll(["id", "title", "category", "content"]) &&
+                      isValidPrescription(incoming());
+      allow update: if isAdmin() && isValidId(prescriptionId) && incoming().id == prescriptionId &&
+                      isValidPrescription(incoming()) && (
+                        incoming().diff(existing()).affectedKeys().hasOnly([
+                          'title', 'category', 'content', 'notes',
+                          'lastReviewedAt', 'nextReviewAt', 'reviewStatus', 'reviewNotes', 'reviewedBy', 'reviewPriority', 'createdAt', 'updatedAt', 'reviewHistory', 'customReviewIntervalMonths'
+                        ])
+                      );
+      allow delete: if isAdmin();
+    }
+
+    match /diseases/{diseaseId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(diseaseId) && incoming().id == diseaseId &&
+                      isValidDisease(incoming());
+      allow update: if isAdmin() && isValidId(diseaseId) && incoming().id == diseaseId &&
+                      isValidDisease(incoming()) && (
+                        incoming().diff(existing()).affectedKeys().hasOnly([
+                          'nome', 'sintomas', 'fatores_risco', 'red_flags', 'diferenciais',
+                          'achados_exames', 'criterios_diagnosticos', 'categoria', 'inTrash',
+                          'definition', 'epidemiology', 'etiology', 'pathophysiology', 'treatment',
+                          'complications', 'prognosis', 'references',
+                          'lastReviewedAt', 'nextReviewAt', 'reviewStatus', 'reviewNotes', 'reviewedBy', 'reviewPriority', 'createdAt', 'updatedAt', 'reviewHistory', 'customReviewIntervalMonths'
+                        ])
+                      );
+      allow delete: if isAdmin();
+    }
+
+    match /review_settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /calculator_reviews/{calculatorId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /special_guides/{guideId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /consultRoutines/{routineId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
