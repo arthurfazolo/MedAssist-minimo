@@ -1,0 +1,159 @@
+diff --git a/types.ts b/types.ts
+index c3f5ebf..579d99a 100644
+--- a/types.ts
++++ b/types.ts
+@@ -8,13 +8,9 @@ export interface ReviewHistoryEntry {
+   notes: string;
+ }
+ 
+-export interface PrescriptionModel {
+-  id: string;
+-  title: string;
+-  category: string;
+-  content: string; // The prescription text
+-  notes: string; // Contraindications, administration routes
+-  // Review Queue parameters
++// Shared review-queue metadata used by PrescriptionModel, CalculatorDefinition,
++// Medication, ConsultRoutine, Protocolo and MedicalDisease.
++export interface Reviewable {
+   lastReviewedAt?: string;
+   nextReviewAt?: string;
+   reviewStatus?: 'up_to_date' | 'review_due' | 'overdue' | 'under_review';
+@@ -27,6 +23,14 @@ export interface PrescriptionModel {
+   customReviewIntervalMonths?: number;
+ }
+ 
++export interface PrescriptionModel extends Reviewable {
++  id: string;
++  title: string;
++  category: string;
++  content: string; // The prescription text
++  notes: string; // Contraindications, administration routes
++}
++
+ export interface CalculatorResult {
+   value: number | string;
+   unit?: string;
+@@ -47,7 +51,7 @@ export interface CalculatorInput {
+   defaultValue?: any;
+ }
+ 
+-export interface CalculatorDefinition {
++export interface CalculatorDefinition extends Reviewable {
+   id: string;
+   name: string;
+   description: string;
+@@ -55,17 +59,6 @@ export interface CalculatorDefinition {
+   inputs: CalculatorInput[];
+   calculate: (values: Record<string, any>) => CalculatorResult;
+   formula?: string;
+-  // Review Queue parameters
+-  lastReviewedAt?: string;
+-  nextReviewAt?: string;
+-  reviewStatus?: 'up_to_date' | 'review_due' | 'overdue' | 'under_review';
+-  reviewNotes?: string;
+-  reviewedBy?: string;
+-  reviewPriority?: 'low' | 'medium' | 'high';
+-  createdAt?: string;
+-  updatedAt?: string;
+-  reviewHistory?: ReviewHistoryEntry[];
+-  customReviewIntervalMonths?: number;
+ }
+ 
+ // AI Related Types
+@@ -90,7 +83,7 @@ export interface User {
+ }
+ 
+ // Medication Types
+-export interface Medication {
++export interface Medication extends Reviewable {
+   id: string;
+   genericName: string;
+   pharmacologicalClass: string;
+@@ -116,17 +109,6 @@ export interface Medication {
+     condition: string;       // Nome da doença/indicação
+     prescriptionTitle?: string; // Título exato do modelo em Prescriptions, para linkar
+   }[];
+-  // Review Queue parameters
+-  lastReviewedAt?: string;
+-  nextReviewAt?: string;
+-  reviewStatus?: 'up_to_date' | 'review_due' | 'overdue' | 'under_review';
+-  reviewNotes?: string;
+-  reviewedBy?: string;
+-  reviewPriority?: 'low' | 'medium' | 'high';
+-  createdAt?: string;
+-  updatedAt?: string;
+-  reviewHistory?: ReviewHistoryEntry[];
+-  customReviewIntervalMonths?: number;
+ }
+ 
+ // Clinical Guide (Protocol) Types
+@@ -198,27 +180,16 @@ export interface SpecialConsultItem {
+   blocos?: UniversalBlock[];
+ }
+ 
+-export interface ConsultRoutine {
++export interface ConsultRoutine extends Reviewable {
+   id: string;
+   titulo: string;
+   categoria: string;
+   descricao: string;
+   status?: 'completo' | 'construcao';
+   consultas: SpecialConsultItem[];
+-  // Review Queue parameters
+-  lastReviewedAt?: string;
+-  nextReviewAt?: string;
+-  reviewStatus?: 'up_to_date' | 'review_due' | 'overdue' | 'under_review';
+-  reviewNotes?: string;
+-  reviewedBy?: string;
+-  reviewPriority?: 'low' | 'medium' | 'high';
+-  createdAt?: string;
+-  updatedAt?: string;
+-  reviewHistory?: ReviewHistoryEntry[];
+-  customReviewIntervalMonths?: number;
+ }
+ 
+-export interface Protocolo {
++export interface Protocolo extends Reviewable {
+   id: string;
+   titulo: string;
+   category?: string; // mapping fallback if needed
+@@ -226,20 +197,9 @@ export interface Protocolo {
+   descricao: string;
+   status: 'completo' | 'construcao';
+   nos: ProtocoloNo[];
+-  // Review Queue parameters
+-  lastReviewedAt?: string;
+-  nextReviewAt?: string;
+-  reviewStatus?: 'up_to_date' | 'review_due' | 'overdue' | 'under_review';
+-  reviewNotes?: string;
+-  reviewedBy?: string;
+-  reviewPriority?: 'low' | 'medium' | 'high';
+-  createdAt?: string;
+-  updatedAt?: string;
+-  reviewHistory?: ReviewHistoryEntry[];
+-  customReviewIntervalMonths?: number;
+ }
+ 
+-export interface MedicalDisease {
++export interface MedicalDisease extends Reviewable {
+   id: string;
+   nome: string;
+   sintomas: string[];
+@@ -258,16 +218,5 @@ export interface MedicalDisease {
+   complications?: string;
+   prognosis?: string;
+   references?: string[];
+-  // Review Queue parameters
+-  lastReviewedAt?: string;
+-  nextReviewAt?: string;
+-  reviewStatus?: 'up_to_date' | 'review_due' | 'overdue' | 'under_review';
+-  reviewNotes?: string;
+-  reviewedBy?: string;
+-  reviewPriority?: 'low' | 'medium' | 'high';
+-  createdAt?: string;
+-  updatedAt?: string;
+-  reviewHistory?: ReviewHistoryEntry[];
+-  customReviewIntervalMonths?: number;
+ }
+ 
